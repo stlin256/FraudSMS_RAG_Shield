@@ -1,0 +1,6 @@
+gradio==5.23.1
+numpy==1.26.4
+pandas==2.2.3
+torch==2.6.0+cu126
+tqdm==4.67.1
+transformers==4.49.0
