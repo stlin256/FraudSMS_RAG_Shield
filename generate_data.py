@@ -48,7 +48,7 @@ def get_embedding(text: str):
 
 # ========== 初始化 FAISS 索引 ==========
 print("初始化 FAISS 索引...")
-dimension = 768  # m3e-large 输出 768 维
+dimension = 768  # m3e-base 输出 768 维
 cpu_index = faiss.IndexFlatL2(dimension)
 gpu_res = faiss.StandardGpuResources()
 gpu_index = faiss.index_cpu_to_gpu(gpu_res, GPU_DEVICE, cpu_index)
