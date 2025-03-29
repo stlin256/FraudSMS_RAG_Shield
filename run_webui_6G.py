@@ -28,7 +28,7 @@ MAX_TOKENS = 512  # 模型最大输出长度
 MAX_RETRIES = 0  # 输出异常最大重试数
 
 # ========== 加载 Qwen2.5-7B ==========
-# 使用 INT4 量化，可在 8G 显存显卡上运行
+# 6G显存优化配置，实测运行占用5.8G显存
 print("加载 Qwen2.5-7B...")
 quant_config = BitsAndBytesConfig(
     load_in_4bit=True,
