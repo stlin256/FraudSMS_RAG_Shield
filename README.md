@@ -78,6 +78,11 @@ conda activate sms
 pip install -r requirements.txt
 ```
 
+安装pytorch（根据自身配置前往[pytorch.org](https://pytorch.org/)获取下载链接）
+```bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+```
+
 安装 FAISS（GPU 版本）：
 
 ```bash
