@@ -78,7 +78,7 @@ conda activate sms
 pip install -r requirements.txt
 ```
 
-安装pytorch（根据自身配置前往[pytorch.org](https://pytorch.org/)获取下载链接）
+安装pytorch2.6.0（根据自身配置前往[pytorch.org](https://pytorch.org/)获取下载命令）
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
 ```
