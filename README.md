@@ -47,7 +47,16 @@
 
 ### 硬件要求
 
-- **最低配置**：配备 **8GB 显存** 的 NVIDIA GPU（支持 CUDA）。
+- **流畅配置**：配备 **8GB 显存** 的 NVIDIA GPU。
+
+```
+    对于30字以内的输入，RTX4060Laptop耗时约3s
+```
+
+- **最低配置**：配备 **6GB 显存** 的 NVIDIA GPU
+```
+    对于30字以内的输入，GTX1660S耗时30s-40s
+```
 
 ------
 
@@ -114,6 +123,7 @@ conda install -c conda-forge faiss-gpu
 │   generate_data.py
 │   run_shell.py
 │   run_webui.py
+│   run_webui_6G.py
 │   requirements.txt
 │
 ├───m3e-base
@@ -155,19 +165,21 @@ python run_webui.py
 
 - 等待模型加载完成，终端将输出一个 URL（ 默认 http://127.0.0.1:7860 ）。
 - 在浏览器中打开该链接，即可进入交互界面。
+- 如果**显存<8G**，请使用`run_webui_6G.py`
 
 #### 2. 命令行交互
 ```bash
 python run_shell.py
 ```
 - 模型加载完成后，可在终端输入短信内容进行分类。
-
+- 如果**显存<8G**，请替换`quant_config`和`llm_model`为`run_shell_6G.py`中的版本
 
 #### 3. 基准测试
 ```bash
 python benchmark.py
 ```
 - 将自动加载 fraud_sms_dataset.json 中的测试数据，运行评估并输出结果。
+- 如果**显存<8G**，请替换`quant_config`和`llm_model`为`run_shell_6G.py`中的版本
 
 #### 4. 生成数据库（可选）
 ```bash

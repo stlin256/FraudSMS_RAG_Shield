@@ -19,31 +19,17 @@ LLM_PATH = "./Qwen2.5-7B"  # Qwen2.5-7B 模型路径
 M3E_PATH = "./m3e-base"  # m3e 向量化模型路径
 FAISS_INDEX_FILE = "fraud_sms_faiss.index"  # FAISS 索引文件
 METADATA_FILE = "fraud_sms_metadata.json"  # 元数据文件
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"  # 自动选择设备
+DEVICE = "cuda"
 SAFE_MODE = False  # True: 稳妥模式（三次预测取多数），False: 普通模式（单次预测）
 DE_BUG = False  # 显示模型原始输出开关
 SHOW_CATEGORY = False  # 输出甄别类别开关
 SHOW_SAMPLE = True  # 输出相似短信开关
-MAX_TOKENS = 1024  # 模型最大输出长度
-MAX_RETRIES = 2  # 输出异常最大重试数
+MAX_TOKENS = 512  # 模型最大输出长度
+MAX_RETRIES = 0  # 输出异常最大重试数
 
 # ========== 加载 Qwen2.5-7B ==========
 # 使用 INT4 量化，可在 8G 显存显卡上运行
 print("加载 Qwen2.5-7B...")
-quant_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_compute_dtype=torch.float16,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_use_double_quant=True
-)
-llm_tokenizer = AutoTokenizer.from_pretrained(LLM_PATH, trust_remote_code=True)
-llm_model = AutoModelForCausalLM.from_pretrained(
-    LLM_PATH,
-    quantization_config=quant_config,
-    device_map="auto",
-    torch_dtype=torch.float16
-).eval()
-'''
 quant_config = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_compute_dtype=torch.float16,
@@ -61,7 +47,7 @@ llm_model = AutoModelForCausalLM.from_pretrained(
     max_memory={0: "5GiB"},
     offload_folder="./offload_temp"
 ).eval()
-'''
+
 # ========== 加载 FAISS 索引 ==========
 print("加载 FAISS 索引...")
 index = faiss.read_index(FAISS_INDEX_FILE)
