@@ -217,7 +217,7 @@ def classify_sms(sms_text):
     if not SAFE_MODE:
         pred_label, reason, similar_sms = single_classify(sms_text, similar_texts, 1)
         if pred_label is None:
-            print("❌ 模型异常，无法预测此短信（重试两次后仍为模板输出）")
+            print("❌ 模型输出异常")
             return None
 
         if pred_label != '正常短信':
@@ -236,7 +236,7 @@ def classify_sms(sms_text):
         for attempt in range(3):
             pred_label, reason, similar_sms = single_classify(sms_text, similar_texts, attempt + 1)
             if pred_label is None:
-                print("❌ 模型异常，无法预测此短信（稳妥模式中重试异常）")
+                print("❌ 模型输出异常（稳妥模式中重试异常）")
                 return None
             results.append((pred_label, reason, similar_sms))
 
