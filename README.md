@@ -2,6 +2,9 @@
 
 # 融合大模型推理与RAG检索增强的诈骗短信甄别系统
 
+#### 4月1日更新——支持以OpenAI标准调用在线api。
+#### 3月29日更新——支持在6G显存情况下使用Qwen2.5-7B推理。
+
 ### 简介
 
 本项目结合大模型推理与 **RAG（检索增强生成）** 技术，致力于对短信进行精准识别和分类，保护用户免受电信诈骗侵害。系统基于 [Telecom_Fraud_Texts_5](https://github.com/ChangMianRen/Telecom_Fraud_Texts_5) 数据集，采用 [m3e-base](https://huggingface.co/moka-ai/m3e-base) 模型对短信进行向量化，利用 [FAISS](https://github.com/facebookresearch/faiss) 实现快速相似性检索，并结合 [Qwen2.5-7B](https://huggingface.co/Qwen/Qwen2.5-7B) 大模型进行深度推理。系统能够识别 **“正常短信”** 及以下四类诈骗类型：
@@ -22,6 +25,7 @@
 - **可解释性强**：输出分类结果、理由及相似短信示例，帮助用户理解判断依据。
 - **用户友好**：通过 [Gradio](https://gradio.app/) 提供可视化 Web 界面，便于交互。
 - **创新结合**：结合 RAG 技术和大模型推理，提升分类准确性和推理深度。
+- **轻量部署**：提供调用在线api版，无需本地部署推理，轻量便携。
 
 ------
 
@@ -47,6 +51,7 @@
 
 ### 硬件要求
 
+#### 对于本地推理
 - **流畅配置**：配备 **8GB 显存** 的 NVIDIA GPU。
 
 ```
@@ -56,6 +61,12 @@
 - **最低配置**：配备 **6GB 显存** 的 NVIDIA GPU
 ```
     对于30字以内的输入，GTX1660S耗时20-35s
+```
+
+#### 对于调用在线api
+- **最低配置**：**是台电脑都能跑**
+```
+    对于30字以内的输入，深度求索官网DeepSeek V3 约3-6s
 ```
 
 ------
@@ -98,6 +109,7 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 conda install -c conda-forge faiss-gpu
 ```
 
+
 4. 下载模型和数据集
 
 - **模型下载**：
@@ -106,6 +118,7 @@ conda install -c conda-forge faiss-gpu
   - 如果无法访问 Hugging Face，可使用镜像：
     - [Qwen2.5-7B (HF Mirror)](https://hf-mirror.com/Qwen/Qwen2.5-7B)
     - [m3e-base (HF Mirror)](https://hf-mirror.com/moka-ai/m3e-base)
+  - **注意**：调用在线api进行推理，只需下载[m3e-base](https://huggingface.co/moka-ai/m3e-base)
 - **数据集下载（可选）**：
   - [Telecom_Fraud_Texts_5](https://github.com/ChangMianRen/Telecom_Fraud_Texts_5)
   - **注意**：项目已附带向量化数据集（fraud_sms_faiss.index 和 fraud_sms_metadata.json），推理时无需下载原始数据集。
@@ -124,6 +137,7 @@ conda install -c conda-forge faiss-gpu
 │   run_shell.py
 │   run_webui.py
 │   run_webui_6G.py
+│   run_webui_api.py
 │   requirements.txt
 │
 ├───m3e-base
@@ -157,7 +171,7 @@ conda install -c conda-forge faiss-gpu
 
 ### 运行项目
 
-#### 1. Web交互
+#### 1. 使用本地推理的Web交互
 
 ```bash
 python run_webui.py
@@ -166,6 +180,23 @@ python run_webui.py
 - 等待模型加载完成，终端将输出一个 URL（ 默认 http://127.0.0.1:7860 ）。
 - 在浏览器中打开该链接，即可进入交互界面。
 - 如果**显存<8G**，请使用`run_webui_6G.py`
+
+#### 1. 调用在线api推理的Web交互
+
+-  在`run_webui_api.py`的配置中填入以下信息
+
+```python
+api_key = "<你的api_key>" #你的api_key
+base_url = "<你的base_url>" #你的base_url
+model_name = "<你调用的模型>" #你调用的模型
+```
+- api_key可在各平台获得，如[阿里云](https://www.aliyun.com)、[深度求索开放平台](https://platform.deepseek.com)等
+```bash
+python run_webui_api.py
+```
+
+- 等待模型加载完成，终端将输出一个 URL（ 默认 http://127.0.0.1:7860 ）。
+- 在浏览器中打开该链接，即可进入交互界面。
 
 #### 2. 命令行交互
 ```bash
@@ -191,7 +222,7 @@ python generate_data.py
 
 ### 代码配置
 
-以下参数可在 run_webui.py、run_shell.py 或 benchmark.py 中调整：
+以下参数可在 run_webui.py、run_webui_6G.py、run_shell.py 或 benchmark.py 中调整：
 
 - **LLM_PATH = "./Qwen2.5-7B"**
   大模型路径。
@@ -208,20 +239,48 @@ python generate_data.py
 - **DE_BUG = False**
   是否显示模型原始输出（调试用）。
 - **SHOW_CATEGORY = False**
-  是否显示分类类别。
+  是否输出分类类别。
 - **SHOW_SAMPLE = True**
-  是否显示相似短信示例。
+  是否输出相似短信示例。
 - **MAX_TOKENS = 1024**
   模型最大输出长度。
 - **MAX_RETRIES = 2**
   输出异常时的最大重试次数。
+
+以下参数可在 run_webui_api.py 中调整：
+
+- **M3E_PATH = "./m3e-base"**
+  向量化模型路径（需与生成索引时使用的模型一致）。
+- **FAISS_INDEX_FILE = "fraud_sms_faiss.index"**
+  FAISS 索引文件路径。
+- **METADATA_FILE = "fraud_sms_metadata.json"**
+  元数据文件路径。
+- **MAX_TOKENS = 1024**
+  模型最大输出长度。
+- **api_key = "your_api_key"**
+  填入你的api_key。
+- **base_url = "your_base_url"**
+  填入你的base_url。
+- **model_name = "your_model"**
+  填入你调用的模型名称。
+- **DE_BUG = False**
+  是否显示模型原始输出。
+- **SHOW_CATEGORY = False**
+  是否输出分类类别。
+- **SHOW_SAMPLE = True**
+  是否输出相似短信示例。
+- **SHOW_HISTORY = False**
+  是否输出web页面的聊天历史记录。
+- **SHOW_USED_TIME = True**
+  是否输出调用api耗时。
+
 
 ------
 
 
 ### 基准测试结果
 
-以下为系统在普通模式下的测试结果（ benchmark.py）：
+以下为系统在Qwen2.5-7B推理，使用普通模式下的测试结果（ benchmark.py）：
 
 ```plaintext
 === 评测结果 ===
