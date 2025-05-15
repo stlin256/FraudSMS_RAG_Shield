@@ -1,3 +1,290 @@
+# FraudSMS_RAG_Shield
+<a href="#cn">中文介绍</a>
+# Fraud SMS Detection System Integrating Large Model Reasoning and RAG Retrieval Enhancement
+
+#### April 1 Update - Supports invoking online APIs using the OpenAI standard  
+#### March 29 Update - Supports Qwen2.5-7B inference with 6GB VRAM
+
+## Introduction
+
+This project combines large language model reasoning with **RAG (Retrieval-Augmented Generation)** technology to accurately identify and classify SMS messages, protecting users from telecom fraud. Based on the [Telecom_Fraud_Texts_5](https://github.com/ChangMianRen/Telecom_Fraud_Texts_5) dataset, the system uses the [m3e-base](https://huggingface.co/moka-ai/m3e-base) model for SMS vectorization, leverages [FAISS](https://github.com/facebookresearch/faiss) for fast similarity retrieval, and integrates the [Qwen2.5-7B](https://huggingface.co/Qwen/Qwen2.5-7B) large language model for deep reasoning. The system identifies **"Normal SMS"** and the following four fraud categories:
+
+- **Impersonating Law Enforcement** (pretending to be authorities to intimidate or request information)  
+- **Loan Scams** (Involving loans and favorable conditions to induce money transfers)
+- **Impersonating Customer Service** (fraudulent service personnel requesting information or payments)  
+- **Impersonating Leaders/Acquaintances** (pretending to be superiors/acquaintances demanding transfers)  
+
+By providing classification results, reasoning explanations, and similar SMS examples, the system enhances both accuracy and interpretability to help users effectively defend against fraudulent messages.
+
+---
+
+## Key Features
+
+- **High Accuracy**: Fraud SMS false negative rate of only **3%** (based on benchmark.py results)  
+- **Fast Response**: Average response time of **3 seconds** on NVIDIA 4060 Laptop  
+- **Interpretability**: Outputs classification results, reasoning, and similar SMS examples  
+- **User-Friendly**: Visual web interface via [Gradio](https://gradio.app/)  
+- **Innovative Integration**: Combines RAG and LLM reasoning for enhanced accuracy and depth  
+- **Lightweight Deployment**: Online API version available without local model deployment
+
+---
+
+## Demonstration
+
+### run_webui.py
+
+Mobile browser interface:  
+![Local Path](Pictures/手机webui.png "Mobile WebUI")  
+Desktop browser interface:  
+![Local Path](Pictures/PCwebui.png "Desktop WebUI")
+
+### run_shell.py  
+![Local Path](Pictures/PCshell.png "Shell Interface")
+
+### benchmark.py  
+![Local Path](Pictures/PCbenchmark_1.png "Benchmark Results")  
+<center>Intermediate content omitted</center>  
+
+![Local Path](Pictures/PCbenchmark_2.png "Extended Results")
+
+---
+
+## Hardware Requirements
+
+### Local Inference  
+- **Recommended Configuration**: NVIDIA GPU with **8GB VRAM**  
+```
+    RTX4060 Laptop: ~3s for <30-character input
+```
+- **Minimum Configuration**: NVIDIA GPU with **6GB VRAM**  
+```
+    GTX1660S: 20-35s for <30-character input
+```
+
+### Online API Version  
+- **Minimum Requirement**: Any computer  
+```
+    DeepSeek V3 via DeepSeek platform: 3-6s for <30-character input
+```
+
+---
+
+## Installation & Configuration
+
+1. **Install Anaconda**  
+- Download and install Anaconda: [Anaconda.org](https://www.anaconda.com/)  
+- Open **Anaconda Prompt** after installation  
+- Create virtual environment  
+
+```bash
+conda create -n sms python=3.12
+```
+
+2. **Activate Environment**  
+```bash
+conda activate sms
+```
+
+3. **Install Dependencies**  
+In project root directory:  
+```bash
+pip install -r requirements.txt
+```
+
+Install PyTorch 2.6.0 (replace with your configuration from [pytorch.org](https://pytorch.org/)):  
+```bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126  
+```
+
+Install FAISS (GPU version):  
+```bash
+conda install -c conda-forge faiss-gpu
+```
+
+4. **Download Models & Datasets**  
+- **Models**:  
+  - [Qwen2.5-7B](https://huggingface.co/Qwen/Qwen2.5-7B)  
+  - [m3e-base](https://huggingface.co/moka-ai/m3e-base)  
+  - Mirrors:  
+    - [Qwen2.5-7B (HF Mirror)](https://hf-mirror.com/Qwen/Qwen2.5-7B)  
+    - [m3e-base (HF Mirror)](https://hf-mirror.com/moka-ai/m3e-base)  
+  - *Note*: API version requires only [m3e-base](https://huggingface.co/moka-ai/m3e-base)  
+- **Dataset (Optional)**:  
+  - [Telecom_Fraud_Texts_5](https://github.com/ChangMianRen/Telecom_Fraud_Texts_5)  
+  - *Note*: Vectorized dataset (fraud_sms_faiss.index and fraud_sms_metadata.json) included
+
+---
+
+## File Structure
+
+Ensure the project directory structure matches:  
+```plaintext
+Project Root
+│   benchmark.py
+│   fraud_sms_dataset.json
+│   fraud_sms_faiss.index
+│   fraud_sms_metadata.json
+│   generate_data.py
+│   run_shell.py
+│   run_webui.py
+│   run_webui_6G.py
+│   run_webui_api.py
+│   requirements.txt
+│
+├───m3e-base
+│   │   config.json
+│   │   model.safetensors
+│   │   tokenizer.json
+│   │   (other model files)
+│   └───1_Pooling
+│           config.json
+│
+├───Qwen2.5-7B
+│       config.json
+│       model-00001-of-00004.safetensors
+│       model-00002-of-00004.safetensors
+│       model-00003-of-00004.safetensors
+│       model-00004-of-00004.safetensors
+│       tokenizer.json
+│       (other model files)
+│
+└───Telecom_Fraud_Texts_5-main (Optional)
+        label00-last.csv
+        label01-last.csv
+        label02-last.csv
+        label03-last.csv
+        label04-last.csv
+        LICENSE
+        README.md
+```
+
+---
+
+## Usage
+
+### 1. Local Web Interface  
+```bash
+python run_webui.py
+```
+- Access interface at default URL: http://127.0.0.1:7860  
+- For <8GB VRAM, use `run_webui_6G.py`
+
+### 2. API Web Interface  
+In `run_webui_api.py`:  
+```python
+api_key = "<your_api_key>" 
+base_url = "<your_base_url>" 
+model_name = "<target_model>" 
+```
+Example platforms: [Alibaba Cloud](https://www.aliyun.com), [DeepSeek Platform](https://platform.deepseek.com)  
+```bash
+python run_webui_api.py
+```
+
+### 3. Command-Line Interface  
+```bash
+python run_shell.py
+```
+For <8GB VRAM, use configurations from `run_shell_6G.py`
+
+### 4. Benchmark Testing  
+```bash
+python benchmark.py
+```
+For <8GB VRAM, use configurations from `run_shell_6G.py`
+
+### 5. Database Generation (Optional)  
+```bash
+python generate_data.py
+```
+*Note: Pre-generated database included in repository*
+
+---
+
+## Configuration Parameters
+
+### Shared Parameters (run_webui.py/run_webui_6G.py/run_shell.py/benchmark.py):  
+- **LLM_PATH = "./Qwen2.5-7B"**  
+- **M3E_PATH = "./m3e-base"**  
+- **FAISS_INDEX_FILE = "fraud_sms_faiss.index"**  
+- **METADATA_FILE = "fraud_sms_metadata.json"**  
+- **SAFE_MODE = False**  
+  - True: Conservative mode (3 predictions with majority voting)  
+  - False: Standard mode (single prediction)  
+- **DE_BUG = False**  
+  - Show raw model outputs  
+- **SHOW_CATEGORY = False**  
+- **SHOW_SAMPLE = True**  
+- **MAX_TOKENS = 1024**  
+- **MAX_RETRIES = 2**  
+
+### API Mode Parameters (run_webui_api.py):  
+- **M3E_PATH**, **FAISS_INDEX_FILE**, **METADATA_FILE**  
+- **MAX_TOKENS = 1024**  
+- **api_key**, **base_url**, **model_name**  
+- **SHOW_HISTORY = False**  
+- **SHOW_USED_TIME = True**  
+
+---
+
+## Benchmark Results
+
+Test results using Qwen2.5-7B in standard mode (benchmark.py):  
+```plaintext
+=== Evaluation Results ===
+Mode: Standard  
+Total SMS: 100  
+Correct Category Classification: 93  
+Correct Fraud Detection: 97  
+False Positives: 0  
+Misclassifications: 7  
+No Result: 0  
+Format Errors: 0  
+Model Crashes: 0  
+Success Rate: 93.00% (Correct Category / (Total - Crashes))  
+Fraud Detection Rate: 97.00% (Correct Fraud / (Total - Crashes))  
+False Positive Rate: 0.00%  
+False Negative Rate: 3.00% (Missed Fraud / (Total - Crashes))
+```
+
+---
+
+## License
+
+This project uses the GPLv3 license. See [LICENSE](LICENSE) for details.
+
+---
+
+## Dataset Usage Restrictions
+
+The [Telecom_Fraud_Texts_5](https://github.com/ChangMianRen/Telecom_Fraud_Texts_5) dataset has specific restrictions:
+
+**Authorized Use**:  
+- Limited to scientific research by universities and research institutions  
+- **Prohibited** for commercial purposes (no commercial licenses available)  
+
+**Attribution Requirement**:  
+When using this dataset in publications, please cite:  
+Li, J.; Zhang, C.; Jiang, L. Innovative Telecom Fraud Detection: A New Dataset and an Advanced Model with RoBERTa and Dual Loss Functions. *Appl. Sci.* 2024, **14**, 11628. https://doi.org/10.3390/app142411628  
+
+---
+
+## Contact
+
+- **GitHub**: [stlin256](https://github.com/stlin256)  
+- Contributions and suggestions welcome!
+
+---
+
+## Acknowledgments
+
+- Special thanks to [ChangMianRen](https://github.com/ChangMianRen) for the [Telecom_Fraud_Texts_5](https://github.com/ChangMianRen/Telecom_Fraud_Texts_5) dataset  
+- Appreciation to [Qwen](https://huggingface.co/Qwen) and [moka-ai](https://huggingface.co/moka-ai) for their high-quality models
+
+-----
+
+<div id="cn"></div>
+
 ## FraudSMS_RAG_Shield
 
 # 融合大模型推理与RAG检索增强的诈骗短信甄别系统
